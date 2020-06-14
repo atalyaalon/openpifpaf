@@ -234,6 +234,8 @@ def cli():  # pylint: disable=too-many-statements
                         help='write a json and a zip file of the predictions')
     parser.add_argument('--all-images', default=False, action='store_true',
                         help='run over all images irrespective of catIds')
+    parser.add_argument('--dataset-image-dir', default=None)
+    parser.add_argument('--dataset-annotations', default=None)
 
     group = parser.add_argument_group('logging')
     group.add_argument('--debug', default=False, action='store_true',
@@ -278,6 +280,9 @@ def cli():  # pylint: disable=too-many-statements
     elif args.dataset == 'test-dev':
         args.image_dir = IMAGE_DIR_TEST
         args.annotation_file = ANNOTATIONS_TESTDEV
+    elif args.dataset == 'other':
+        args.image_dir = args.dataset_image_dir
+        args.annotation_file = args.dataset_annotations
     else:
         raise Exception
 
@@ -285,6 +290,8 @@ def cli():  # pylint: disable=too-many-statements
         raise Exception('have to use --write-predictions for this dataset')
     if args.dataset in ('test', 'test-dev') and not args.all_images and not args.debug:
         raise Exception('have to use --all-images for this dataset')
+    if args.dataset in ('other') and not args.dataset_image_dir or not args.dataset_annotations:
+        raise Exception('have to add dataset-image-dir and dataset-annotations arguments for this dataset')
 
     # add args.device
     args.device = torch.device('cpu')
