@@ -233,8 +233,8 @@ def cli():  # pylint: disable=too-many-statements
     parser.add_argument('--write-predictions', default=False, action='store_true',
                         help='write a json and a zip file of the predictions')
     parser.add_argument('--all-images', default=False, action='store_true',
-                        help='run over all images irrespective of catIds'),
-    parser.add_argument('--dataset-image-dir', default=None),
+                        help='run over all images irrespective of catIds')
+    parser.add_argument('--dataset-image-dir', default=None)
     parser.add_argument('--dataset-annotations', default=None)
 
     group = parser.add_argument_group('logging')
