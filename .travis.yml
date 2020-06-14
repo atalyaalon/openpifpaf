@@ -64,7 +64,7 @@ matrix:
 install:
  - "pip3 install --editable .[test]"
 script:
- - pylint openpifpaf --disable=fixme
+ - pylint openpifpaf --disable=fixme,too-many-branches
  - pytest -vv
  - |
    if [ $PIFPAFTRAINING == "1" ]; then

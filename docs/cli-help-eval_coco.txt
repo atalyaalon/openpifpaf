@@ -32,7 +32,7 @@ optional arguments:
   --detection-annotations
   -n N                  number of batches (default: 0)
   --skip-n SKIP_N       skip n batches (default: 0)
-  --dataset {val,test,test-dev}
+  --dataset {val,test,test-dev,other}
                         dataset to evaluate (default: val)
   --min-ann MIN_ANN     minimum number of truth annotations (default: 0)
   --batch-size BATCH_SIZE
@@ -50,7 +50,8 @@ optional arguments:
                         (default: False)
   --all-images          run over all images irrespective of catIds (default:
                         False)
-
+  --dataset-image-dir   in case dataset is other, add this dir
+  --dataset-annotations in case dataset is other, add annotations
 network configuration:
   --checkpoint CHECKPOINT
                         Load a model from a checkpoint. Use "resnet50",
