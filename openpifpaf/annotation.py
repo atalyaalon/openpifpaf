@@ -2,7 +2,7 @@ import numpy as np
 
 import pyximport
 pyximport.install()
-# pylint: disable=import-error
+# pylint: disable=wrong-import-position
 from .functional import scalar_value_clipped
 
 NOTSET = '__notset__'
