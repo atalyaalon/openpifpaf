@@ -10,7 +10,7 @@ import socket
 import sys
 import numpy as np
 import pysparkling
-
+import os
 from . import show
 
 try:
@@ -32,8 +32,11 @@ def configure(args):
     from pythonjsonlogger import jsonlogger
     from . import __version__ as VERSION
 
+    if not os.path.exists(args.output):
+        os.mkdir(args.output)
+
     log_file = args.output + '.log'
-    open(log_file, 'a').close()
+    os.mknod(log_file)
     file_handler = logging.FileHandler(log_file, mode='w')
     file_handler.setFormatter(
         jsonlogger.JsonFormatter('(message) (levelname) (name) (asctime)'))
