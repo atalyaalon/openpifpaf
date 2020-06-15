@@ -8,7 +8,6 @@ import logging
 from pprint import pprint
 import socket
 import sys
-
 import numpy as np
 import pysparkling
 
@@ -33,7 +32,9 @@ def configure(args):
     from pythonjsonlogger import jsonlogger
     from . import __version__ as VERSION
 
-    file_handler = logging.FileHandler(args.output + '.log', mode='w')
+    log_file = args.output + '.log'
+    open(log_file, 'a').close()
+    file_handler = logging.FileHandler(log_file, mode='w')
     file_handler.setFormatter(
         jsonlogger.JsonFormatter('(message) (levelname) (name) (asctime)'))
     stdout_handler = logging.StreamHandler(sys.stdout)
