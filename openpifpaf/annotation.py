@@ -1,5 +1,5 @@
 import numpy as np
-
+# pylint: disable=import-error
 import pyximport
 pyximport.install()
 # pylint: disable=wrong-import-position

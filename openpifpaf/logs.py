@@ -10,7 +10,6 @@ import socket
 import sys
 import numpy as np
 import pysparkling
-import os
 from . import show
 
 try:
