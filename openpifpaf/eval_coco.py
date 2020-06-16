@@ -214,7 +214,7 @@ def cli():  # pylint: disable=too-many-statements
                         help='number of batches')
     parser.add_argument('--skip-n', default=0, type=int,
                         help='skip n batches')
-    parser.add_argument('--dataset', choices=('val', 'test', 'test-dev'), default='val',
+    parser.add_argument('--dataset', choices=('val', 'test', 'test-dev', 'other'), default='val',
                         help='dataset to evaluate')
     parser.add_argument('--min-ann', default=0, type=int,
                         help='minimum number of truth annotations')
