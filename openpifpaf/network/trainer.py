@@ -284,8 +284,7 @@ class Trainer(object):
             with open(filename, 'rb') as f:
                 for byte_block in iter(lambda: f.read(8192), b''):
                     sha256_hash.update(byte_block)
-            file_hash = sha256_hash.hexdigest()
-            outname, _, outext = self.out.rpartition('.')
+            _, _, outext = self.out.rpartition('.')
             final_filename = outext
             shutil.copyfile(filename, final_filename)
 
