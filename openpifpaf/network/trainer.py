@@ -286,7 +286,7 @@ class Trainer(object):
                     sha256_hash.update(byte_block)
             file_hash = sha256_hash.hexdigest()
             outname, _, outext = self.out.rpartition('.')
-            final_filename = '{}-{}.{}'.format(outname, file_hash[:8], outext)
+            final_filename = outext
             shutil.copyfile(filename, final_filename)
 
         self.model.to(self.device)
