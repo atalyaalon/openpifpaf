@@ -160,7 +160,7 @@ class EvalCoco(object):
     def write_predictions(self, filename):
         predictions = [
             {k: v for k, v in annotation.items()
-             if k in ('image_id', 'category_id', 'keypoints', 'score')}
+             if k in ('image_id', 'category_id', 'keypoints', 'score', 'bbox')}
             for annotation in self.predictions
         ]
         with open(filename + '.pred.json', 'w') as f:
