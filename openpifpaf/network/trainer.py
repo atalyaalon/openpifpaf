@@ -1,17 +1,13 @@
 """Train a pifpaf net."""
 
-import pathlib
 import copy
 import hashlib
 import logging
 import shutil
 import time
 import torch
-from torch.utils.tensorboard import SummaryWriter
-import torchvision
 
 LOG = logging.getLogger(__name__)
-TENSORBOARD_LOGS_DIR = pathlib.Path('..', 'tb_logs')
 
 
 class Trainer(object):
@@ -40,13 +36,11 @@ class Trainer(object):
         self.ema_restore_params = None
 
         self.model_meta_data = model_meta_data
-        self.writer = SummaryWriter(TENSORBOARD_LOGS_DIR)
 
         if train_profile:
             # monkey patch to profile self.train_batch()
             self.trace_counter = 0
             self.train_batch_without_profile = self.train_batch
-
             def train_batch_with_profile(*args, **kwargs):
                 with torch.autograd.profiler.profile(use_cuda=True) as prof:
                     result = self.train_batch_without_profile(*args, **kwargs)
@@ -57,7 +51,6 @@ class Trainer(object):
                 LOG.info('writing trace file %s', tracefilename)
                 prof.export_chrome_trace(tracefilename)
                 return result
-
             self.train_batch = train_batch_with_profile
 
         LOG.info({
@@ -106,18 +99,10 @@ class Trainer(object):
             self.write_model(epoch + 1, epoch == epochs - 1)
             self.val(val_scenes, epoch + 1)
 
-    def train_batch(self, data, targets, epoch, batch_idx, amount_of_images,
-                    apply_gradients=True):  # pylint: disable=method-hidden
+    def train_batch(self, data, targets, apply_gradients=True):  # pylint: disable=method-hidden
         if self.device:
             data = data.to(self.device, non_blocking=True)
             targets = [[t.to(self.device, non_blocking=True) for t in head] for head in targets]
-
-        # write images to TB
-        # need to check how can we plot the images with the keypoints all together,
-        # both for predictions and labels.
-        if batch_idx % 1000 == 1:
-            img_grid = torchvision.utils.make_grid(data)
-            self.writer.add_image(f'epoch {epoch} - batch {batch_idx}', img_grid)
 
         # train encoder
         with torch.autograd.profiler.record_function('model'):
@@ -127,7 +112,6 @@ class Trainer(object):
         if loss is not None:
             with torch.autograd.profiler.record_function('backward'):
                 loss.backward()
-                self.writer.add_scalar('training loss', loss, epoch * amount_of_images + batch_idx)
         if apply_gradients:
             with torch.autograd.profiler.record_function('step'):
                 self.optimizer.step()
@@ -141,7 +125,7 @@ class Trainer(object):
              for l in head_losses],
         )
 
-    def val_batch(self, data, targets, batch_idx):
+    def val_batch(self, data, targets):
         if self.device:
             data = data.to(self.device, non_blocking=True)
             targets = [[t.to(self.device, non_blocking=True) for t in head] for head in targets]
@@ -149,7 +133,7 @@ class Trainer(object):
         with torch.no_grad():
             outputs = self.model(data)
             loss, head_losses = self.loss(outputs, targets)
-            self.writer.add_scalar('val loss', loss, batch_idx)
+
         return (
             float(loss.item()) if loss is not None else None,
             [float(l.item()) if l is not None else None
@@ -181,9 +165,7 @@ class Trainer(object):
 
             batch_start = time.time()
             apply_gradients = batch_idx % self.stride_apply == 0
-            loss, head_losses = self.train_batch(data, target,
-                                                 epoch, batch_idx, len(scenes),
-                                                 apply_gradients)
+            loss, head_losses = self.train_batch(data, target, apply_gradients)
 
             # update epoch accumulates
             if loss is not None:
@@ -252,8 +234,8 @@ class Trainer(object):
         epoch_loss = 0.0
         head_epoch_losses = None
         head_epoch_counts = None
-        for batch_idx, data, target, _ in enumerate(scenes):
-            loss, head_losses = self.val_batch(data, target, batch_idx)
+        for data, target, _ in scenes:
+            loss, head_losses = self.val_batch(data, target)
 
             # update epoch accumulates
             if loss is not None:
