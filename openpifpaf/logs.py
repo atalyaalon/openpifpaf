@@ -36,7 +36,9 @@ def configure(args):
     file_handler.setFormatter(
         jsonlogger.JsonFormatter('(message) (levelname) (name) (asctime)'))
     stdout_handler = logging.StreamHandler(sys.stdout)
-    logging.basicConfig(handlers=[stdout_handler, file_handler])
+    logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        handlers=[stdout_handler, file_handler])
     log_level = logging.INFO if not args.debug else logging.DEBUG
     logging.getLogger('openpifpaf').setLevel(log_level)
     LOG.info({
