@@ -1,4 +1,5 @@
 # cython: infer_types=True
+# cython: language_level=3
 cimport cython
 from libc.math cimport exp, fabs, sqrt, fmin, fmax
 import numpy as np
