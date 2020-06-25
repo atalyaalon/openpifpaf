@@ -37,3 +37,4 @@ decoder_flame.svg
 *.onnx
 debug.*.png
 test-clis-*/
+.idea/
