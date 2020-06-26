@@ -126,7 +126,7 @@ class Trainer(object):
         if loss is not None:
             with torch.autograd.profiler.record_function('backward'):
                 loss.backward()
-                LOG.info('Writing loss to TB - epoch {epoch}, batch {batch}'.format(epoch=epoch,
+                LOG.info('Writing loss to TB - epoch {epoch}, batch {batch_idx}'.format(epoch=epoch,
                                                                                     batch_idx=batch_idx))
                 self.writer.add_scalar(self.out + ' : ' + 'training loss', loss, epoch * amount_of_scenes + batch_idx)
         if apply_gradients:
