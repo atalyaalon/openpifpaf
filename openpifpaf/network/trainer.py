@@ -8,7 +8,7 @@ import shutil
 import time
 import torch
 import os
-import cv2
+from matplotlib.image import imread
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 
@@ -139,7 +139,7 @@ class Trainer(object):
                                              image_output_dir=self.tb_image_output_dir))
             for curr_meta, curr_image_path in zip(meta, images_paths):
                 curr_image_name = curr_meta['file_name']
-                img = cv2.imread(curr_image_path)
+                img = imread(curr_image_path)
                 img = torch.from_numpy(np.array(img.cpu().permute(1, 2, 0)))
                 image_tb_file_name = self.out + ' epoch {epoch} - batch {batch_idx} - image {image_name}'.format(epoch=epoch,
                                                                                                                  batch_idx=batch_idx,
