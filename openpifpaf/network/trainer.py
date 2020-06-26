@@ -278,7 +278,7 @@ class Trainer(object):
         epoch_loss = 0.0
         head_epoch_losses = None
         head_epoch_counts = None
-        for batch_idx, data, target, _ in enumerate(scenes):
+        for batch_idx, (data, target, _) in enumerate(scenes):
             loss, head_losses = self.val_batch(data, target, batch_idx)
 
             # update epoch accumulates
