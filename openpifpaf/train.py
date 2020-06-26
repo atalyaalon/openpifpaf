@@ -61,8 +61,6 @@ def cli():
                         help='ema decay constant')
     parser.add_argument('--disable-cuda', action='store_true',
                         help='disable CUDA')
-    parser.add_argument('--tb-image-output-dir', default='tb_image_output_dir',
-                        help='image output dir for predicting and adding TensorBoard')
     group = parser.add_argument_group('debug')
     group.add_argument('--profile', default=None,
                        help='enables profiling. specify path for chrome tracing file')
@@ -122,8 +120,7 @@ def main():
             'version': VERSION,
             'hostname': socket.gethostname(),
         },
-        train_image_dir=args.coco_train_image_dir,
-        tb_image_output_dir=args.tb_image_output_dir,
+        train_image_dir=args.coco_train_image_dir
     )
     trainer.loop(train_loader, val_loader, args.epochs, start_epoch=start_epoch)
 

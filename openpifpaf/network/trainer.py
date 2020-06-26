@@ -8,7 +8,6 @@ import shutil
 import time
 import torch
 import os
-from matplotlib.image import imread
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 
@@ -28,8 +27,7 @@ class Trainer(object):
                  ema_decay=None,
                  train_profile=None,
                  model_meta_data=None,
-                 train_image_dir=None,
-                 tb_image_output_dir=None):
+                 train_image_dir=None):
         self.model = model
         self.loss = loss
         self.optimizer = optimizer
@@ -47,9 +45,6 @@ class Trainer(object):
 
         self.model_meta_data = model_meta_data
         self.train_image_dir = train_image_dir
-        self.tb_image_output_dir = tb_image_output_dir
-        if not os.path.exists(self.tb_image_output_dir):
-            os.mkdir(self.tb_image_output_dir)
         self.writer = SummaryWriter(TENSORBOARD_LOGS_DIR)
 
         if train_profile:
@@ -115,6 +110,7 @@ class Trainer(object):
 
             self.write_model(epoch + 1, epoch == epochs - 1)
             self.val(val_scenes, epoch + 1)
+        self.writer.close()
 
     def train_batch(self, data, targets, meta, epoch, batch_idx, amount_of_images,
                     apply_gradients=True):  # pylint: disable=method-hidden
