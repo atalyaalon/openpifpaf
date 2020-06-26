@@ -35,7 +35,7 @@ usage: train.py [-h] [--debug] [--checkpoint CHECKPOINT] [--basenet BASENET]
                 [-o OUTPUT] [--stride-apply STRIDE_APPLY] [--epochs EPOCHS]
                 [--rescale-images RESCALE_IMAGES]
                 [--update-batchnorm-runningstatistics] [--ema EMA]
-                [--disable-cuda] [--profile PROFILE] [--log-stats]
+                [--disable-cuda] [--tb-image-output-dir] [--profile PROFILE] [--log-stats]
 
 Train a pifpaf network.
 
@@ -52,6 +52,7 @@ optional arguments:
                         update batch norm running statistics (default: False)
   --ema EMA             ema decay constant (default: 0.001)
   --disable-cuda        disable CUDA (default: False)
+  --tb-image-output-dir tensorboard image output dir
 
 logging:
   --debug               print debug messages (default: False)

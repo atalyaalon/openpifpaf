@@ -9,10 +9,20 @@ import time
 import torch
 from torch.utils.tensorboard import SummaryWriter
 import torchvision
+import os
+import cv2
 
 LOG = logging.getLogger(__name__)
 TENSORBOARD_LOGS_DIR = pathlib.Path('..', 'tb_logs')
+if not os.path.exists(TENSORBOARD_LOGS_DIR):
+    os.mkdir(TENSORBOARD_LOGS_DIR)
 
+TOP_OPENPIFPAF_DIR = pathlib.Path('..', '..')
+PREDICT_COMMAND = """cd {openpifpaf_path} && \
+                        python -m openpifpaf.predict \
+                            {images} \
+                            --checkpoint {checkpoint} \
+                            --image-output {image_output_dir}"""
 
 class Trainer(object):
     def __init__(self, model, loss, optimizer, out, *,
@@ -23,7 +33,9 @@ class Trainer(object):
                  stride_apply=1,
                  ema_decay=None,
                  train_profile=None,
-                 model_meta_data=None):
+                 model_meta_data=None,
+                 train_image_dir=None,
+                 tb_image_output_dir=None):
         self.model = model
         self.loss = loss
         self.optimizer = optimizer
@@ -40,6 +52,10 @@ class Trainer(object):
         self.ema_restore_params = None
 
         self.model_meta_data = model_meta_data
+        self.train_image_dir = train_image_dir
+        self.tb_image_output_dir = tb_image_output_dir
+        if not os.path.exists(self.tb_image_output_dir):
+            os.mkdir(self.tb_image_output_dir)
         self.writer = SummaryWriter(TENSORBOARD_LOGS_DIR)
 
         if train_profile:
@@ -106,19 +122,27 @@ class Trainer(object):
             self.write_model(epoch + 1, epoch == epochs - 1)
             self.val(val_scenes, epoch + 1)
 
-    def train_batch(self, data, targets, epoch, batch_idx, amount_of_images,
+    def train_batch(self, data, targets, meta, epoch, batch_idx, amount_of_images,
                     apply_gradients=True):  # pylint: disable=method-hidden
         if self.device:
             data = data.to(self.device, non_blocking=True)
             targets = [[t.to(self.device, non_blocking=True) for t in head] for head in targets]
 
-        # write images to TB
-        # need to check how can we plot the images with the keypoints all together,
-        # both for predictions and labels.
-        if batch_idx % 1000 == 1:
-            img_grid = torchvision.utils.make_grid(data)
-            self.writer.add_image(f'epoch {epoch} - batch {batch_idx}', img_grid)
-
+        # write images with predictions to TB
+        if epoch % 30 == 1 and epoch > 0 and batch_idx % 100 == 1:
+            curr_model = '{}.epoch{:03d}'.format(self.out, epoch-1)
+            images_paths = [os.path.join(self.train_image_dir, curr_meta['file_name'], '.predictions.png') for curr_meta in meta]
+            os.system(PREDICT_COMMAND.format(openpifpaf_path=TOP_OPENPIFPAF_DIR,
+                                                 images=' '.join(images_paths),
+                                                 checkpoint=curr_model,
+                                                 image_output_dir=self.tb_image_output_dir))
+            for curr_meta, curr_image_path in zip(meta, images_paths):
+                curr_image_name = curr_meta['file_name']
+                img = cv2.imread(curr_image_path)
+                img = torch.from_numpy(np.array(img.cpu().permute(1,2,0)))
+                self.writer.add_image(self.out + ' epoch {epoch} - batch {batch_idx} - image {image_name}'.format(epoch=epoch,
+                                                                                                                  batch_idx=batch_idx,
+                                                                                                                  image_name=curr_image_name), img)
         # train encoder
         with torch.autograd.profiler.record_function('model'):
             outputs = self.model(data)
@@ -127,7 +151,7 @@ class Trainer(object):
         if loss is not None:
             with torch.autograd.profiler.record_function('backward'):
                 loss.backward()
-                self.writer.add_scalar('training loss', loss, epoch * amount_of_images + batch_idx)
+                self.writer.add_scalar(self.out + ' : ' + 'training loss', loss, epoch * amount_of_images + batch_idx)
         if apply_gradients:
             with torch.autograd.profiler.record_function('step'):
                 self.optimizer.step()
@@ -149,7 +173,7 @@ class Trainer(object):
         with torch.no_grad():
             outputs = self.model(data)
             loss, head_losses = self.loss(outputs, targets)
-            self.writer.add_scalar('val loss', loss, batch_idx)
+            self.writer.add_scalar(self.out + ' : ' + 'val loss', loss, batch_idx)
         return (
             float(loss.item()) if loss is not None else None,
             [float(l.item()) if l is not None else None
@@ -176,12 +200,12 @@ class Trainer(object):
         head_epoch_counts = None
         last_batch_end = time.time()
         self.optimizer.zero_grad()
-        for batch_idx, (data, target, _) in enumerate(scenes):
+        for batch_idx, (data, target, meta) in enumerate(scenes):
             preprocess_time = time.time() - last_batch_end
 
             batch_start = time.time()
             apply_gradients = batch_idx % self.stride_apply == 0
-            loss, head_losses = self.train_batch(data, target,
+            loss, head_losses = self.train_batch(data, target, meta,
                                                  epoch, batch_idx, len(scenes),
                                                  apply_gradients)
 
