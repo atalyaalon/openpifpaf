@@ -143,7 +143,7 @@ def out_name(arg_list, in_name, default_extension):
 
 def main():
     args = cli()
-
+    logging.info('Predicting for checkpoint: {checkpoint}'.format(checkpoint=args.checkpoint))
     processor, model = processor_factory(args)
     preprocess = preprocess_factory(args)
 
