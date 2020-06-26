@@ -7,10 +7,10 @@ import logging
 import shutil
 import time
 import torch
-from torch.utils.tensorboard import SummaryWriter
-import torchvision
 import os
 import cv2
+import numpy as np
+from torch.utils.tensorboard import SummaryWriter
 
 LOG = logging.getLogger(__name__)
 TENSORBOARD_LOGS_DIR = pathlib.Path('..', 'tb_logs')
@@ -131,18 +131,20 @@ class Trainer(object):
         # write images with predictions to TB
         if epoch % 30 == 1 and epoch > 0 and batch_idx % 100 == 1:
             curr_model = '{}.epoch{:03d}'.format(self.out, epoch-1)
-            images_paths = [os.path.join(self.train_image_dir, curr_meta['file_name'], '.predictions.png') for curr_meta in meta]
+            images_paths = [os.path.join(self.train_image_dir, curr_meta['file_name'], '.predictions.png') \
+                            for curr_meta in meta]
             os.system(PREDICT_COMMAND.format(openpifpaf_path=TOP_OPENPIFPAF_DIR,
-                                                 images=' '.join(images_paths),
-                                                 checkpoint=curr_model,
-                                                 image_output_dir=self.tb_image_output_dir))
+                                             images=' '.join(images_paths),
+                                             checkpoint=curr_model,
+                                             image_output_dir=self.tb_image_output_dir))
             for curr_meta, curr_image_path in zip(meta, images_paths):
                 curr_image_name = curr_meta['file_name']
                 img = cv2.imread(curr_image_path)
-                img = torch.from_numpy(np.array(img.cpu().permute(1,2,0)))
-                self.writer.add_image(self.out + ' epoch {epoch} - batch {batch_idx} - image {image_name}'.format(epoch=epoch,
-                                                                                                                  batch_idx=batch_idx,
-                                                                                                                  image_name=curr_image_name), img)
+                img = torch.from_numpy(np.array(img.cpu().permute(1, 2, 0)))
+                image_tb_file_name = self.out + ' epoch {epoch} - batch {batch_idx} - image {image_name}'.format(epoch=epoch,
+                                                                                                                 batch_idx=batch_idx,
+                                                                                                                 image_name=curr_image_name)
+                self.writer.add_image(image_tb_file_name, img)
         # train encoder
         with torch.autograd.profiler.record_function('model'):
             outputs = self.model(data)
