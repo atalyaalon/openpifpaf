@@ -112,7 +112,7 @@ class Trainer(object):
             self.val(val_scenes, epoch + 1)
         self.writer.close()
 
-    def train_batch(self, data, targets, meta, epoch, batch_idx, amount_of_images,
+    def train_batch(self, data, targets, meta, epoch, batch_idx, amount_of_scenes,
                     apply_gradients=True):  # pylint: disable=method-hidden
         if self.device:
             data = data.to(self.device, non_blocking=True)
@@ -126,7 +126,9 @@ class Trainer(object):
         if loss is not None:
             with torch.autograd.profiler.record_function('backward'):
                 loss.backward()
-                self.writer.add_scalar(self.out + ' : ' + 'training loss', loss, epoch * amount_of_images + batch_idx)
+                LOG.info('Writing loss to TB - epoch {epoch}, batch {batch}'.format(epoch=epoch,
+                                                                                    batch_idx=batch_idx))
+                self.writer.add_scalar(self.out + ' : ' + 'training loss', loss, epoch * amount_of_scenes + batch_idx)
         if apply_gradients:
             with torch.autograd.profiler.record_function('step'):
                 self.optimizer.step()
@@ -140,7 +142,7 @@ class Trainer(object):
              for l in head_losses],
         )
 
-    def val_batch(self, data, targets, batch_idx):
+    def val_batch(self, data, targets, epoch, batch_idx, amount_of_scenes):
         if self.device:
             data = data.to(self.device, non_blocking=True)
             targets = [[t.to(self.device, non_blocking=True) for t in head] for head in targets]
@@ -148,7 +150,7 @@ class Trainer(object):
         with torch.no_grad():
             outputs = self.model(data)
             loss, head_losses = self.loss(outputs, targets)
-            self.writer.add_scalar(self.out + ' : ' + 'val loss', loss, batch_idx)
+            self.writer.add_scalar(self.out + ' : ' + 'val loss', loss, epoch * amount_of_scenes + batch_idx)
         return (
             float(loss.item()) if loss is not None else None,
             [float(l.item()) if l is not None else None
@@ -252,7 +254,7 @@ class Trainer(object):
         head_epoch_losses = None
         head_epoch_counts = None
         for batch_idx, (data, target, _) in enumerate(scenes):
-            loss, head_losses = self.val_batch(data, target, batch_idx)
+            loss, head_losses = self.val_batch(data, target, epoch, batch_idx, len(scenes))
 
             # update epoch accumulates
             if loss is not None:
