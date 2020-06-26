@@ -57,6 +57,7 @@ def factory(
         multi_scale=False,
         multi_scale_hflip=True):
 
+    logging.info('base_name is {}'.format('base_name'))
     if base_name:
         assert head_names
         assert checkpoint is None
@@ -91,6 +92,7 @@ def factory(
                 checkpoint, check_hash=not checkpoint.startswith('https'))
         else:
             checkpoint = torch.load(checkpoint)
+            logging.info('Loaded model from checkpoint')
         net_cpu = checkpoint['model']
         epoch = checkpoint['epoch']
 
