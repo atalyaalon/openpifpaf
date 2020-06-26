@@ -18,12 +18,6 @@ TENSORBOARD_LOGS_DIR = pathlib.Path('..', 'tb_logs')
 if not os.path.exists(TENSORBOARD_LOGS_DIR):
     os.mkdir(TENSORBOARD_LOGS_DIR)
 
-TOP_OPENPIFPAF_DIR = pathlib.Path('..', '..')
-PREDICT_COMMAND = """python -m openpifpaf.predict \
-                            {images} \
-                            --checkpoint {checkpoint} \
-                            --image-output {image_output_dir}"""
-
 class Trainer(object):
     def __init__(self, model, loss, optimizer, out, *,
                  lr_scheduler=None,
@@ -127,25 +121,7 @@ class Trainer(object):
         if self.device:
             data = data.to(self.device, non_blocking=True)
             targets = [[t.to(self.device, non_blocking=True) for t in head] for head in targets]
-        LOG.info("Curr working dir {}".format(os.getcwd()))
-        # write images with predictions to TB
-        if epoch % 30 == 1 and epoch > 0 and batch_idx == 0:
-            curr_model = '{}.epoch{:03d}'.format(self.out, epoch)
-            images_paths = [os.path.join(self.train_image_dir, curr_meta['file_name']) \
-                            for curr_meta in meta]
-            LOG.info("Curr working dir {}".format(os.getcwd()))
-            assert os.path.exists(curr_model)
-            os.system(PREDICT_COMMAND.format(images=' '.join(images_paths),
-                                             checkpoint=curr_model,
-                                             image_output_dir=self.tb_image_output_dir))
-            for curr_meta in meta:
-                curr_pred_image_path = os.path.join(self.tb_image_output_dir, curr_meta['file_name'].strip('.jpg') + '.predictions.png')
-                img = imread(curr_pred_image_path)
-                img = torch.from_numpy(np.array(img.cpu().permute(1, 2, 0)))
-                image_tb_file_name = self.out + ' epoch {epoch} - batch {batch_idx} - image {image_name}'.format(epoch=epoch,
-                                                                                                                 batch_idx=batch_idx,
-                                                                                                                 image_name=curr_image_name)
-                self.writer.add_image(image_tb_file_name, img)
+
         # train encoder
         with torch.autograd.profiler.record_function('model'):
             outputs = self.model(data)
