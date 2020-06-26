@@ -137,7 +137,7 @@ class Trainer(object):
                                              checkpoint=curr_model,
                                              image_output_dir=self.tb_image_output_dir))
             for curr_meta in meta:
-                curr_pred_image_path = os.path.join(image_output_dir=self.tb_image_output_dir, curr_meta['file_name'].strip('.jpg') + '.predictions.png')
+                curr_pred_image_path = os.path.join(self.tb_image_output_dir, curr_meta['file_name'].strip('.jpg') + '.predictions.png')
                 img = imread(curr_pred_image_path)
                 img = torch.from_numpy(np.array(img.cpu().permute(1, 2, 0)))
                 image_tb_file_name = self.out + ' epoch {epoch} - batch {batch_idx} - image {image_name}'.format(epoch=epoch,
