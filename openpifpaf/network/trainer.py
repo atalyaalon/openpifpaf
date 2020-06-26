@@ -129,9 +129,9 @@ class Trainer(object):
             targets = [[t.to(self.device, non_blocking=True) for t in head] for head in targets]
 
         # write images with predictions to TB
-        if epoch % 30 == 1 and epoch > 0 and batch_idx % 100 == 1:
+        if epoch % 30 == 1 and epoch > 0 and batch_idx == 0:
             curr_model = '{}.epoch{:03d}'.format(self.out, epoch-1)
-            images_paths = [os.path.join(self.train_image_dir, curr_meta['file_name'], '.predictions.png') \
+            images_paths = [os.path.join(self.train_image_dir, curr_meta['file_name'].strip('.jpg') + '.predictions.png') \
                             for curr_meta in meta]
             os.system(PREDICT_COMMAND.format(openpifpaf_path=TOP_OPENPIFPAF_DIR,
                                              images=' '.join(images_paths),
