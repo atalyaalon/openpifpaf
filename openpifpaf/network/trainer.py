@@ -129,16 +129,16 @@ class Trainer(object):
 
         # write images with predictions to TB
         if epoch % 30 == 1 and epoch > 0 and batch_idx == 0:
-            curr_model = '{}.epoch{:03d}'.format(self.out, epoch-1)
-            images_paths = [os.path.join(self.train_image_dir, curr_meta['file_name'].strip('.jpg') + '.predictions.png') \
+            curr_model = '{}.epoch{:03d}'.format(self.out, epoch)
+            images_paths = [os.path.join(self.train_image_dir, curr_meta['file_name']) \
                             for curr_meta in meta]
             logging.info("Curr working dir {}".format(os.getcwd()))
             os.system(PREDICT_COMMAND.format(images=' '.join(images_paths),
                                              checkpoint=curr_model,
                                              image_output_dir=self.tb_image_output_dir))
-            for curr_meta, curr_image_path in zip(meta, images_paths):
-                curr_image_name = curr_meta['file_name']
-                img = imread(curr_image_path)
+            for curr_meta in meta:
+                curr_pred_image_path = os.path.join(image_output_dir=self.tb_image_output_dir, curr_meta['file_name'].strip('.jpg') + '.predictions.png')
+                img = imread(curr_pred_image_path)
                 img = torch.from_numpy(np.array(img.cpu().permute(1, 2, 0)))
                 image_tb_file_name = self.out + ' epoch {epoch} - batch {batch_idx} - image {image_name}'.format(epoch=epoch,
                                                                                                                  batch_idx=batch_idx,
