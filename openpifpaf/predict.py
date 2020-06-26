@@ -56,15 +56,6 @@ def cli():
                        help='print debug messages')
     args = parser.parse_args()
 
-    log_level = logging.INFO
-    if args.quiet:
-        log_level = logging.WARNING
-    if args.debug:
-        log_level = logging.DEBUG
-    logging.basicConfig()
-    logging.getLogger('openpifpaf').setLevel(log_level)
-    LOG.setLevel(log_level)
-
     network.configure(args)
     show.configure(args)
     visualizer.configure(args, enable_all_plots_on_debug=True)
@@ -143,7 +134,9 @@ def out_name(arg_list, in_name, default_extension):
 
 def main():
     args = cli()
-    logging.info('Predicting for checkpoint: {checkpoint}'.format(checkpoint=args.checkpoint))
+    LOG.info("Curr working dir {}".format(os.getcwd()))
+    LOG.info("Predicting for checkpoint: {checkpoint}".format(checkpoint=args.checkpoint))
+    assert os.path.exists(args.checkpoint)
     processor, model = processor_factory(args)
     preprocess = preprocess_factory(args)
 

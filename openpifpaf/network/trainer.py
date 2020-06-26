@@ -13,9 +13,6 @@ import numpy as np
 from torch.utils.tensorboard import SummaryWriter
 
 LOG = logging.getLogger(__name__)
-log_level = logging.INFO
-logging.basicConfig()
-logging.getLogger('openpifpaf').setLevel(log_level)
 
 TENSORBOARD_LOGS_DIR = pathlib.Path('..', 'tb_logs')
 if not os.path.exists(TENSORBOARD_LOGS_DIR):
@@ -130,13 +127,14 @@ class Trainer(object):
         if self.device:
             data = data.to(self.device, non_blocking=True)
             targets = [[t.to(self.device, non_blocking=True) for t in head] for head in targets]
-        logging.info("Curr working dir {}".format(os.getcwd()))
+        LOG.info("Curr working dir {}".format(os.getcwd()))
         # write images with predictions to TB
         if epoch % 30 == 1 and epoch > 0 and batch_idx == 0:
             curr_model = '{}.epoch{:03d}'.format(self.out, epoch)
             images_paths = [os.path.join(self.train_image_dir, curr_meta['file_name']) \
                             for curr_meta in meta]
-            logging.info("Curr working dir {}".format(os.getcwd()))
+            LOG.info("Curr working dir {}".format(os.getcwd()))
+            assert os.path.exists(curr_model)
             os.system(PREDICT_COMMAND.format(images=' '.join(images_paths),
                                              checkpoint=curr_model,
                                              image_output_dir=self.tb_image_output_dir))
