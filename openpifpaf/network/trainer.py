@@ -18,8 +18,7 @@ if not os.path.exists(TENSORBOARD_LOGS_DIR):
     os.mkdir(TENSORBOARD_LOGS_DIR)
 
 TOP_OPENPIFPAF_DIR = pathlib.Path('..', '..')
-PREDICT_COMMAND = """cd {openpifpaf_path} && \
-                        python -m openpifpaf.predict \
+PREDICT_COMMAND = """python -m openpifpaf.predict \
                             {images} \
                             --checkpoint {checkpoint} \
                             --image-output {image_output_dir}"""
@@ -133,8 +132,8 @@ class Trainer(object):
             curr_model = '{}.epoch{:03d}'.format(self.out, epoch-1)
             images_paths = [os.path.join(self.train_image_dir, curr_meta['file_name'].strip('.jpg') + '.predictions.png') \
                             for curr_meta in meta]
-            os.system(PREDICT_COMMAND.format(openpifpaf_path=TOP_OPENPIFPAF_DIR,
-                                             images=' '.join(images_paths),
+            logging.info("Curr working dir {}".format(os.getcwd()))
+            os.system(PREDICT_COMMAND.format(images=' '.join(images_paths),
                                              checkpoint=curr_model,
                                              image_output_dir=self.tb_image_output_dir))
             for curr_meta, curr_image_path in zip(meta, images_paths):
