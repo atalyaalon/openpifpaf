@@ -136,7 +136,6 @@ def main():
     args = cli()
     LOG.info("Curr working dir {}".format(os.getcwd()))
     LOG.info("Predicting for checkpoint: {checkpoint}".format(checkpoint=args.checkpoint))
-    assert os.path.exists(args.checkpoint)
     processor, model = processor_factory(args)
     preprocess = preprocess_factory(args)
 
