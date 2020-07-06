@@ -112,10 +112,10 @@ class Trainer(object):
 
             self.write_model(epoch + 1, epoch == epochs - 1)
             self.val(val_scenes, epoch + 1)
-
-            if len(self.val_loss_list) >= 2 * len(self.val_loss_list):
-                if np.sum(self.val_loss_list[-2 * len(self.val_loss_list):-1 * len(self.val_loss_list)]) <= \
-                        np.sum(self.val_loss_list[-1 * len(self.val_loss_list):]):
+            print(f'The loss for epoch: {epoch + 1} is: {self.val_loss_list[epoch + 1]}')
+            if len(self.val_loss_list) >= 2 * self.val_loss_stopping_window_size:
+                if np.sum(self.val_loss_list[-2 * self.val_loss_stopping_window_size:-1 * self.val_loss_stopping_window_size]) <= \
+                        np.sum(self.val_loss_list[-1 * self.val_loss_stopping_window_size:]):
                     LOG.info(f'The validation loss for is raising for the past {self.val_loss_stopping_window_size} epochs.'
                              f'So the model training is stopped now.')
                     break
