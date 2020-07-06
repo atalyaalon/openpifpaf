@@ -46,6 +46,8 @@ class Trainer(object):
         self.model_meta_data = model_meta_data
         self.train_image_dir = train_image_dir
         self.writer = SummaryWriter(TENSORBOARD_LOGS_DIR)
+        self.val_loss_list = []
+        self.val_loss_stopping_window_size = 3
 
         if train_profile:
             # monkey patch to profile self.train_batch()
@@ -110,6 +112,15 @@ class Trainer(object):
 
             self.write_model(epoch + 1, epoch == epochs - 1)
             self.val(val_scenes, epoch + 1)
+            print(f'The loss for epoch: {epoch + 1} is: {self.val_loss_list[epoch]}')
+            if len(self.val_loss_list) >= (2 * self.val_loss_stopping_window_size):
+                if np.sum(self.val_loss_list[(-2 * self.val_loss_stopping_window_size):(-1 * self.val_loss_stopping_window_size)]) <= \
+                        np.sum(self.val_loss_list[(-1 * self.val_loss_stopping_window_size):]):
+                    LOG.info(f'The validation loss for is raising for the past {self.val_loss_stopping_window_size} epochs.'
+                             f'So the model training is stopped now.')
+                    self.write_model(epoch + 1, True)
+                    break
+
         self.writer.close()
 
     def train_batch(self, data, targets, meta, epoch, batch_idx, amount_of_scenes,
@@ -149,6 +160,9 @@ class Trainer(object):
             outputs = self.model(data)
             loss, head_losses = self.loss(outputs, targets)
             self.writer.add_scalar(self.out + ' : ' + 'val loss', loss, epoch * amount_of_scenes + batch_idx)
+
+
+
         return (
             float(loss.item()) if loss is not None else None,
             [float(l.item()) if l is not None else None
@@ -265,6 +279,8 @@ class Trainer(object):
                     continue
                 head_epoch_losses[i] += head_loss
                 head_epoch_counts[i] += 1
+
+        self.val_loss_list.append(epoch_loss)
 
         eval_time = time.time() - start_time
 
