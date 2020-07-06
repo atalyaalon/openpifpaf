@@ -118,6 +118,7 @@ class Trainer(object):
                         np.sum(self.val_loss_list[-1 * self.val_loss_stopping_window_size:]):
                     LOG.info(f'The validation loss for is raising for the past {self.val_loss_stopping_window_size} epochs.'
                              f'So the model training is stopped now.')
+                    self.write_model(epoch + 1, True)
                     break
 
         self.writer.close()
