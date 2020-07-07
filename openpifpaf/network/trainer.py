@@ -112,7 +112,7 @@ class Trainer(object):
 
             self.write_model(epoch + 1, epoch == epochs - 1)
             self.val(val_scenes, epoch + 1)
-            print(f'The loss for epoch: {epoch + 1} is: {self.val_loss_list[epoch]}')
+            LOG.info(f'The loss for epoch: {epoch + 1} is: {self.val_loss_list[epoch]}')
             if len(self.val_loss_list) >= (2 * self.val_loss_stopping_window_size):
                 if np.sum(self.val_loss_list[(-2 * self.val_loss_stopping_window_size):(-1 * self.val_loss_stopping_window_size)]) <= \
                         np.sum(self.val_loss_list[(-1 * self.val_loss_stopping_window_size):]):
