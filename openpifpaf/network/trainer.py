@@ -47,7 +47,7 @@ class Trainer(object):
         self.train_image_dir = train_image_dir
         self.writer = SummaryWriter(TENSORBOARD_LOGS_DIR)
         self.val_loss_list = []
-        self.val_loss_stopping_window_size = 3
+        self.val_loss_stopping_window_size = 15
 
         if train_profile:
             # monkey patch to profile self.train_batch()
