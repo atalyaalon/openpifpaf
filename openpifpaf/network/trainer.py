@@ -13,7 +13,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 LOG = logging.getLogger(__name__)
 
-TENSORBOARD_LOGS_DIR = pathlib.Path('..', 'tb_logs')
+TENSORBOARD_LOGS_DIR = 'tb_logs'
 if not os.path.exists(TENSORBOARD_LOGS_DIR):
     os.mkdir(TENSORBOARD_LOGS_DIR)
 
