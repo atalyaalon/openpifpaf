@@ -10,6 +10,7 @@ import torch
 from . import datasets, encoder, logs, network, optimize, visualizer
 from . import __version__ as VERSION
 
+LOG = logging.getLogger(__name__)
 
 def default_output_file(args, net_cpu):
     base_name = net_cpu.base_net.shortname
@@ -122,6 +123,7 @@ def main():
         },
         train_image_dir=args.coco_train_image_dir
     )
+    LOG.info("Training: image ids count: {count}".format(count=len(train_loader.ids)))
     trainer.loop(train_loader, val_loader, args.epochs, start_epoch=start_epoch)
 
 
