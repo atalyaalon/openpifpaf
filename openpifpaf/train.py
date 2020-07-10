@@ -123,7 +123,6 @@ def main():
         },
         train_image_dir=args.coco_train_image_dir
     )
-    LOG.info("Training: image ids count: {count}".format(count=len(train_loader.dataset.ids)))
     trainer.loop(train_loader, val_loader, args.epochs, start_epoch=start_epoch)
 
 
