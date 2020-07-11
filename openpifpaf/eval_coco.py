@@ -163,6 +163,8 @@ class EvalCoco(object):
              if k in ('image_id', 'category_id', 'keypoints', 'score', 'bbox')}
             for annotation in self.predictions
         ]
+        for p in predictions:
+            p['iscrowd'] = 0
         with open(filename + '.pred.json', 'w') as f:
             json.dump(predictions, f)
         LOG.info('wrote %s.pred.json', filename)
