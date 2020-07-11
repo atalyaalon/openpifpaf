@@ -214,7 +214,7 @@ def cli():  # pylint: disable=too-many-statements
                         help='number of batches')
     parser.add_argument('--skip-n', default=0, type=int,
                         help='skip n batches')
-    parser.add_argument('--dataset', choices=('val', 'test', 'test-dev', 'other'), default='val',
+    parser.add_argument('--dataset', choices=('val', 'test', 'test-dev', 'other', 'other-val'), default='val',
                         help='dataset to evaluate')
     parser.add_argument('--min-ann', default=0, type=int,
                         help='minimum number of truth annotations')
@@ -283,6 +283,9 @@ def cli():  # pylint: disable=too-many-statements
     elif args.dataset == 'other':
         args.image_dir = args.dataset_image_dir
         args.annotation_file = args.dataset_annotations
+    elif args.dataset == 'other-val':
+        args.image_dir = args.dataset_image_dir
+        args.annotation_file = args.dataset_annotations
     else:
         raise Exception
 
@@ -290,7 +293,7 @@ def cli():  # pylint: disable=too-many-statements
         raise Exception('have to use --write-predictions for this dataset')
     if args.dataset in ('test', 'test-dev') and not args.all_images and not args.debug:
         raise Exception('have to use --all-images for this dataset')
-    if args.dataset in ('other') and (not args.dataset_image_dir or not args.dataset_annotations):
+    if args.dataset in ('other', 'other-val') and (not args.dataset_image_dir or not args.dataset_annotations):
         raise Exception('have to add dataset-image-dir and dataset-annotations arguments')
 
     # add args.device
@@ -313,7 +316,7 @@ def write_evaluations(eval_coco, filename, args, total_time, count_ops):
 
     n_images = len(eval_coco.image_ids)
 
-    if args.dataset not in ('test', 'test-dev'):
+    if args.dataset not in ('test', 'test-dev', 'other'):
         stats = eval_coco.stats()
         np.savetxt(filename + '.txt', stats)
         with open(filename + '.stats.json', 'w') as f:
