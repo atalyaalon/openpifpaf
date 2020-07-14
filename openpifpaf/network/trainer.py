@@ -47,8 +47,6 @@ class Trainer(object):
         self.train_image_dir = train_image_dir
         self.writer = SummaryWriter(TENSORBOARD_LOGS_DIR)
         self.val_loss_list = []
-        self.val_loss_stopping_window_size = 15
-        self.min_epochs_count = 90
 
         if train_profile:
             # monkey patch to profile self.train_batch()
@@ -115,14 +113,6 @@ class Trainer(object):
             self.write_model(epoch + 1, epoch == epochs - 1)
             self.val(val_scenes, epoch + 1)
             LOG.info(f'The loss for epoch: {epoch + 1} is: {self.val_loss_list[epoch]}')
-            if epoch > self.min_epochs_count:
-                if len(self.val_loss_list) >= (2 * self.val_loss_stopping_window_size):
-                    if np.sum(self.val_loss_list[(-2 * self.val_loss_stopping_window_size):(-1 * self.val_loss_stopping_window_size)]) <= \
-                            np.sum(self.val_loss_list[(-1 * self.val_loss_stopping_window_size):]):
-                        LOG.info(f'The validation loss for is raising for the past {self.val_loss_stopping_window_size} epochs.'
-                                 f'So the model training is stopped now.')
-                        self.write_model(epoch + 1, True)
-                        break
 
         self.writer.close()
 
