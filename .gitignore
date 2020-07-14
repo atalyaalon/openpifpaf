@@ -38,3 +38,6 @@ decoder_flame.svg
 debug.*.png
 test-clis-*/
 .idea/
+
+*.png
+*.json
