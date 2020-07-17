@@ -28,7 +28,7 @@ usage: train.py [-h] [--debug] [--checkpoint CHECKPOINT] [--basenet BASENET]
                 [--loader-workers LOADER_WORKERS] [--batch-size BATCH_SIZE]
                 [--square-edge SQUARE_EDGE] [--extended-scale]
                 [--orientation-invariant ORIENTATION_INVARIANT]
-                [--no-augmentation] [--debug-cifhr] [--debug-cif-c]
+                [--no-augmentation] [--add-noise] [--debug-cifhr] [--debug-cif-c]
                 [--debug-cif-v] [--debug-cifdet-c] [--debug-cifdet-v]
                 [--debug-caf-c] [--debug-caf-v]
                 [--debug-indices DEBUG_INDICES [DEBUG_INDICES ...]]
@@ -159,6 +159,7 @@ augmentations:
   --orientation-invariant ORIENTATION_INVARIANT
                         augment with random orientations (default: 0.0)
   --no-augmentation     do not apply data augmentation (default: True)
+  --add-noise           apply noisy augmentations during training (Blur)
 
 pose visualizer:
   --debug-cifhr

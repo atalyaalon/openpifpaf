@@ -37,22 +37,21 @@ EVAL_TRANSFORM = Compose([
     ),
 ])
 
-if os.getenv('INJECT_NOISE', 'FALSE') == 'TRUE':
-    TRAIN_TRANSFORM = Compose([
-        NormalizeAnnotations(),
-        ImageTransform(torchvision.transforms.ColorJitter(
-            brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1)),
-        RandomApply(JpegCompression(), 0.1),  # maybe irrelevant for COCO, but good for others
-        RandomApply(Blur(), 0.5),  # maybe irrelevant for COCO, but good for others
-        ImageTransform(torchvision.transforms.RandomGrayscale(p=0.01)),
-        EVAL_TRANSFORM,
-    ])
-else:
-    TRAIN_TRANSFORM = Compose([
-        NormalizeAnnotations(),
-        ImageTransform(torchvision.transforms.ColorJitter(
-            brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1)),
-        RandomApply(JpegCompression(), 0.1),  # maybe irrelevant for COCO, but good for others
-        # RandomApply(Blur(), 0.01),  # maybe irrelevant for COCO, but good for others
-        EVAL_TRANSFORM,
-    ])
+TRAIN_TRANSFORM_NOISY = Compose([
+    NormalizeAnnotations(),
+    ImageTransform(torchvision.transforms.ColorJitter(
+        brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1)),
+    RandomApply(JpegCompression(), 0.1),  # maybe irrelevant for COCO, but good for others
+    RandomApply(Blur(), 0.5),  # maybe irrelevant for COCO, but good for others
+    ImageTransform(torchvision.transforms.RandomGrayscale(p=0.01)),
+    EVAL_TRANSFORM,
+])
+
+TRAIN_TRANSFORM_REGULAR = Compose([
+    NormalizeAnnotations(),
+    ImageTransform(torchvision.transforms.ColorJitter(
+        brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1)),
+    RandomApply(JpegCompression(), 0.1),  # maybe irrelevant for COCO, but good for others
+    # RandomApply(Blur(), 0.01),  # maybe irrelevant for COCO, but good for others
+    EVAL_TRANSFORM,
+])
