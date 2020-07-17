@@ -37,7 +37,7 @@ EVAL_TRANSFORM = Compose([
     ),
 ])
 
-if os.getenv('INJECT_NOISE', 'False') == 'True':
+if os.getenv('INJECT_NOISE', 'FALSE') == 'TRUE':
     TRAIN_TRANSFORM = Compose([
         NormalizeAnnotations(),
         ImageTransform(torchvision.transforms.ColorJitter(
