@@ -45,7 +45,7 @@ if os.getenv('INJECT_NOISE', 'FALSE') == 'TRUE':
         RandomApply(JpegCompression(), 0.1),  # maybe irrelevant for COCO, but good for others
         # RandomApply(Blur(), 0.01),  # maybe irrelevant for COCO, but good for others
         ImageTransform(torchvision.transforms.RandomGrayscale(p=0.01)),
-        A.Blur(p=0.5),
+        ImageTransform(A.Blur(p=0.5)),
         EVAL_TRANSFORM,
     ])
 else:
