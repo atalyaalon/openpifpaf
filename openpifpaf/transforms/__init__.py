@@ -11,7 +11,6 @@ https://pillow.readthedocs.io/en/3.3.x/handbook/concepts.html#coordinate-system
 import os
 
 import torchvision
-import albumentations as A
 
 from .annotations import AnnotationJitter, NormalizeAnnotations
 from .compose import Compose
@@ -37,21 +36,24 @@ EVAL_TRANSFORM = Compose([
     ),
 ])
 
-TRAIN_TRANSFORM_NOISY = Compose([
-    NormalizeAnnotations(),
-    ImageTransform(torchvision.transforms.ColorJitter(
-        brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1)),
-    RandomApply(JpegCompression(), 0.1),  # maybe irrelevant for COCO, but good for others
-    RandomApply(Blur(), 0.5),  # maybe irrelevant for COCO, but good for others
-    ImageTransform(torchvision.transforms.RandomGrayscale(p=0.01)),
-    EVAL_TRANSFORM,
-])
-
-TRAIN_TRANSFORM_REGULAR = Compose([
-    NormalizeAnnotations(),
-    ImageTransform(torchvision.transforms.ColorJitter(
-        brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1)),
-    RandomApply(JpegCompression(), 0.1),  # maybe irrelevant for COCO, but good for others
-    # RandomApply(Blur(), 0.01),  # maybe irrelevant for COCO, but good for others
-    EVAL_TRANSFORM,
-])
+def get_train_transform(add_noise=False, blur_max_sigma=5):
+    if add_noise:
+        TRAIN_TRANSFORM = Compose([
+            NormalizeAnnotations(),
+            ImageTransform(torchvision.transforms.ColorJitter(
+                brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1)),
+            RandomApply(JpegCompression(), 0.1),  # maybe irrelevant for COCO, but good for others
+            RandomApply(Blur(max_sigma=blur_max_sigma), 0.5),  # maybe irrelevant for COCO, but good for others
+            ImageTransform(torchvision.transforms.RandomGrayscale(p=0.01)),
+            EVAL_TRANSFORM,
+        ])
+    else:
+        TRAIN_TRANSFORM = Compose([
+            NormalizeAnnotations(),
+            ImageTransform(torchvision.transforms.ColorJitter(
+                brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1)),
+            RandomApply(JpegCompression(), 0.1),  # maybe irrelevant for COCO, but good for others
+            # RandomApply(Blur(), 0.01),  # maybe irrelevant for COCO, but good for others
+            EVAL_TRANSFORM,
+        ])
+    return TRAIN_TRANSFORM

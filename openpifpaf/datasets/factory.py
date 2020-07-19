@@ -44,7 +44,8 @@ def train_cli(parser):
     group_aug.add_argument('--add-noise', dest='add_noise',
                            default=False, action='store_true',
                            help='apply noisy data augmentations')
-
+    group_aug.add_argument('--blur-max-sigma',default=5, type=float,
+                           help='max sigma in blur data augmentation')
 
 def train_configure(_):
     pass
@@ -57,7 +58,8 @@ def train_cocokp_preprocess_factory(
         extended_scale=False,
         orientation_invariant=0.0,
         rescale_images=1.0,
-        add_noise=False
+        add_noise=False,
+        blur_max_sigma=5
 ):
     if not augmentation:
         return transforms.Compose([
@@ -80,28 +82,16 @@ def train_cocokp_preprocess_factory(
     if orientation_invariant:
         orientation_t = transforms.RandomApply(transforms.RotateBy90(), orientation_invariant)
 
-    if add_noise:
-        return transforms.Compose([
-            transforms.NormalizeAnnotations(),
-            transforms.AnnotationJitter(),
-            transforms.RandomApply(transforms.HFlip(COCO_KEYPOINTS, HFLIP), 0.5),
-            rescale_t,
-            transforms.Crop(square_edge, use_area_of_interest=True),
-            transforms.CenterPad(square_edge),
-            orientation_t,
-            transforms.TRAIN_TRANSFORM_NOISY,
-        ])
-    else:
-        return transforms.Compose([
-            transforms.NormalizeAnnotations(),
-            transforms.AnnotationJitter(),
-            transforms.RandomApply(transforms.HFlip(COCO_KEYPOINTS, HFLIP), 0.5),
-            rescale_t,
-            transforms.Crop(square_edge, use_area_of_interest=True),
-            transforms.CenterPad(square_edge),
-            orientation_t,
-            transforms.TRAIN_TRANSFORM_REGULAR,
-        ])
+    return transforms.Compose([
+        transforms.NormalizeAnnotations(),
+        transforms.AnnotationJitter(),
+        transforms.RandomApply(transforms.HFlip(COCO_KEYPOINTS, HFLIP), 0.5),
+        rescale_t,
+        transforms.Crop(square_edge, use_area_of_interest=True),
+        transforms.CenterPad(square_edge),
+        orientation_t,
+        transforms.get_train_transform(add_noise=add_noise, blur_max_sigma=blur_max_sigma),
+    ])
 
 
 def train_cocodet_preprocess_factory(
@@ -141,7 +131,7 @@ def train_cocodet_preprocess_factory(
         transforms.MinSize(min_side=4.0),
         transforms.UnclippedArea(),
         transforms.UnclippedSides(),
-        transforms.TRAIN_TRANSFORM_REGULAR,
+        transforms.get_train_transform(add_noise=False),
     ])
 
 
@@ -152,7 +142,8 @@ def train_cocokp_factory(args, target_transforms):
         extended_scale=args.extended_scale,
         orientation_invariant=args.orientation_invariant,
         rescale_images=args.rescale_images,
-        add_noise=args.add_noise)
+        add_noise=args.add_noise,
+        blur_max_sigma=args.blur_max_sigma)
 
     if args.loader_workers is None:
         args.loader_workers = args.batch_size
