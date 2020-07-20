@@ -43,7 +43,7 @@ def get_train_transform(add_noise=False, blur_max_sigma=5):
             ImageTransform(torchvision.transforms.ColorJitter(
                 brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1)),
             RandomApply(JpegCompression(), 0.1),  # maybe irrelevant for COCO, but good for others
-            RandomApply(Blur(max_sigma=blur_max_sigma), 0.5),  # maybe irrelevant for COCO, but good for others
+            RandomApply(Blur(max_sigma=blur_max_sigma), 0.2),  # maybe irrelevant for COCO, but good for others
             ImageTransform(torchvision.transforms.RandomGrayscale(p=0.01)),
             EVAL_TRANSFORM,
         ])
